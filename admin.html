@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin – Kenya Deals Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, sans-serif; background: #f0f2f5; color: #1a1a1a; line-height: 1.5; }
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-box { background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.08); width: 100%; max-width: 360px; }
+    .login-box h1 { font-size: 1.3rem; margin-bottom: 8px; }
+    .login-box p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; font-family: inherit; margin-bottom: 12px; }
+    textarea { min-height: 70px; resize: vertical; }
+    button, .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; font-family: inherit; }
+    .btn-primary { background: #f68b1e; color: #fff; }
+    .btn-primary:hover { background: #e07b10; }
+    .btn-secondary { background: #e8e8e8; color: #333; }
+    .btn-danger { background: #e74c3c; color: #fff; }
+    .btn-success { background: #27ae60; color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .error { color: #e74c3c; font-size: 0.85rem; margin-bottom: 10px; }
+    .header { background: #1a1a1a; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .header h1 { font-size: 1.1rem; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab { padding: 8px 16px; background: #e8e8e8; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 0.9rem; }
+    .tab.active { background: #f68b1e; color: #fff; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 12px; border: 1px solid #e8e8e8; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    .card-header h3 { font-size: 1rem; }
+    .card-meta { font-size: 0.8rem; color: #f68b1e; }
+    .card-desc { font-size: 0.85rem; color: #666; margin: 6px 0; }
+    .card-url { font-size: 0.75rem; color: #888; word-break: break-all; }
+    .card-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .form-card { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; border: 1px solid #e8e8e8; }
+    .form-card h2 { font-size: 1.05rem; margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #555; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .checkbox-row input { width: auto; margin: 0; }
+    .notice { background: #fff8e8; border: 1px solid #f5d78e; border-radius: 8px; padding: 12px 14px; font-size: 0.85rem; margin-bottom: 16px; color: #7a5c00; }
+    .notice strong { color: #5a4000; }
+    .settings-grid label { margin-top: 8px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-wrap">
+    <div class="login-box">
+      <h1>Admin Login</h1>
+      <p>Kenya Deals Hub – manage your products</p>
+      <div id="loginError" class="error" style="display:none">Wrong password. Try again.</div>
+      <input type="password" id="passwordInput" placeholder="Enter admin password" autocomplete="current-password">
+      <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Login</button>
+      <p style="margin-top:14px;font-size:0.75rem;color:#999">Default password is in products.json → settings.adminPassword</p>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="adminScreen" style="display:none">
+    <div class="header">
+      <h1>Kenya Deals Hub Admin</h1>
+      <div class="header-actions">
+        <button class="btn btn-success btn-sm" onclick="downloadJSON()">Download products.json</button>
+        <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+    <div class="container">
+      <div class="notice">
+        <strong>How to update your live site:</strong><br>
+        1. Make your changes here<br>
+        2. Click <strong>Download products.json</strong><br>
+        3. Upload that file to your GitHub repo (replace the old products.json)<br>
+        4. Wait 1–2 minutes – your site will update automatically<br><br>
+        <strong>Note:</strong> Every product "Shop on Jumia" button uses your affiliate link from Settings (so you earn commission). The product URL field is kept for your reference only.
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="phones" onclick="switchTab('phones')">Phones</div>
+        <div class="tab" data-tab="appliances" onclick="switchTab('appliances')">Appliances</div>
+        <div class="tab" data-tab="wifi" onclick="switchTab('wifi')">WiFi & Accessories</div>
+        <div class="tab" data-tab="settings" onclick="switchTab('settings')">Settings</div>
+        <div class="tab" data-tab="add" onclick="switchTab('add')">+ Add Product</div>
+      </div>
+
+      <div id="panel-phones" class="panel active"></div>
+      <div id="panel-appliances" class="panel"></div>
+      <div id="panel-wifi" class="panel"></div>
+
+      <div id="panel-settings" class="panel">
+        <div class="form-card settings-grid">
+          <h2>Site Settings</h2>
+          <label>Affiliate Link</label>
+          <input type="url" id="setAffiliate">
+          <label>WhatsApp (with country code, no +)</label>
+          <input type="text" id="setWhatsapp">
+          <label>Email</label>
+          <input type="email" id="setEmail">
+          <label>Admin Password</label>
+          <input type="text" id="setPassword">
+          <button class="btn btn-primary" style="margin-top:10px" onclick="saveSettings()">Save Settings</button>
+        </div>
+      </div>
+
+      <div id="panel-add" class="panel">
+        <div class="form-card">
+          <h2>Add New Product</h2>
+          <label>Category</label>
+          <select id="addCategory">
+            <option value="phones">Phones</option>
+            <option value="appliances">Appliances</option>
+            <option value="wifi">WiFi & Accessories</option>
+          </select>
+          <label>Product Name</label>
+          <input type="text" id="addName" placeholder="e.g. Xiaomi Redmi 15C">
+          <div class="form-row">
+            <div>
+              <label>Meta (specs line)</label>
+              <input type="text" id="addMeta" placeholder="6.9&quot; • 4GB • 6000mAh">
+            </div>
+            <div>
+              <label>Badge (optional)</label>
+              <input type="text" id="addBadge" placeholder="Top Seller">
+            </div>
+          </div>
+          <label>Description</label>
+          <textarea id="addDesc" placeholder="Short product description"></textarea>
+          <label>Image path</label>
+          <input type="text" id="addImage" placeholder="images/redmi-15c.jpg" value="images/redmi-15c.jpg">
+          <label>Jumia Product URL</label>
+          <input type="url" id="addUrl" placeholder="https://www.jumia.co.ke/...">
+          <div class="checkbox-row">
+            <input type="checkbox" id="addFeatured">
+            <label for="addFeatured" style="margin:0">Featured product</label>
+          </div>
+          <button class="btn btn-primary" onclick="addProduct()">Add Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let data = null;
+    let editId = null;
+    let editCat = null;
+
+    async function loadData() {
+      try {
+        const res = await fetch('products.json?t=' + Date.now());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        data = await res.json();
+        if (!data.settings) data.settings = {};
+        if (!data.settings.adminPassword) data.settings.adminPassword = 'jumia2026';
+        if (!data.settings.affiliateLink) data.settings.affiliateLink = 'https://jforce.jumia.co.ke/s/eeIzZkk';
+      } catch (e) {
+        console.error(e);
+        alert('Could not load products.json. Make sure it is uploaded next to admin.html on GitHub.\n\nError: ' + e.message);
+        data = { phones: [], appliances: [], wifi: [], settings: { affiliateLink: 'https://jforce.jumia.co.ke/s/eeIzZkk', whatsapp: '254114499160', email: 'victormusembi99@gmail.com', adminPassword: 'jumia2026' } };
+      }
+    }
+
+    function doLogin() {
+      const pw = document.getElementById('passwordInput').value;
+      if (!data) return;
+      if (pw === data.settings.adminPassword) {
+        sessionStorage.setItem('adminAuth', '1');
+        showAdmin();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    document.getElementById('passwordInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    function logout() {
+      sessionStorage.removeItem('adminAuth');
+      location.reload();
+    }
+
+    function showAdmin() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminScreen').style.display = 'block';
+      renderAll();
+      fillSettings();
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + name).classList.add('active');
+    }
+
+    function renderAll() {
+      ['phones', 'appliances', 'wifi'].forEach(cat => {
+        const el = document.getElementById('panel-' + cat);
+        const list = data[cat] || [];
+        if (!list.length) {
+          el.innerHTML = '<p style="color:#888">No products yet. Use + Add Product.</p>';
+          return;
+        }
+        el.innerHTML = list.map(p => `
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>${escapeHtml(p.name)} ${p.featured ? '⭐' : ''}</h3>
+                <div class="card-meta">${escapeHtml(p.meta || '')}</div>
+              </div>
+              ${p.badge ? `<span style="background:#fff4e8;color:#e07b10;font-size:0.7rem;padding:3px 8px;border-radius:999px;font-weight:700">${escapeHtml(p.badge)}</span>` : ''}
+            </div>
+            <div class="card-desc">${escapeHtml(p.description || '')}</div>
+            <div class="card-url">${escapeHtml(p.url || '')}</div>
+            <div class="card-actions">
+              <button class="btn btn-secondary btn-sm" onclick="startEdit('${cat}','${p.id}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteProduct('${cat}','${p.id}')">Delete</button>
+            </div>
+            <div id="edit-${p.id}" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #eee"></div>
+          </div>
+        `).join('');
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function startEdit(cat, id) {
+      const p = data[cat].find(x => x.id === id);
+      if (!p) return;
+      const box = document.getElementById('edit-' + id);
+      box.style.display = 'block';
+      box.innerHTML = `
+        <label>Name</label><input id="e-name-${id}" value="${escapeHtml(p.name)}">
+        <label>Meta</label><input id="e-meta-${id}" value="${escapeHtml(p.meta)}">
+        <label>Description</label><textarea id="e-desc-${id}">${escapeHtml(p.description)}</textarea>
+        <label>Image path</label><input id="e-img-${id}" value="${escapeHtml(p.image)}">
+        <label>Jumia URL</label><input id="e-url-${id}" value="${escapeHtml(p.url)}">
+        <label>Badge</label><input id="e-badge-${id}" value="${escapeHtml(p.badge || '')}">
+        <div class="checkbox-row"><input type="checkbox" id="e-feat-${id}" ${p.featured ? 'checked' : ''}><label for="e-feat-${id}" style="margin:0">Featured</label></div>
+        <button class="btn btn-primary btn-sm" onclick="saveEdit('${cat}','${id}')">Save</button>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('edit-${id}').style.display='none'">Cancel</button>
+      `;
+    }
+
+    function saveEdit(cat, id) {
+      const p = data[cat].find(x => x.id === id);
+      if (!p) return;
+      p.name = document.getElementById('e-name-' + id).value.trim();
+      p.meta = document.getElementById('e-meta-' + id).value.trim();
+      p.description = document.getElementById('e-desc-' + id).value.trim();
+      p.image = document.getElementById('e-img-' + id).value.trim();
+      p.url = document.getElementById('e-url-' + id).value.trim();
+      p.badge = document.getElementById('e-badge-' + id).value.trim();
+      p.featured = document.getElementById('e-feat-' + id).checked;
+      renderAll();
+      alert('Saved in memory. Click Download products.json to keep the change.');
+    }
+
+    function deleteProduct(cat, id) {
+      if (!confirm('Delete this product?')) return;
+      data[cat] = data[cat].filter(x => x.id !== id);
+      renderAll();
+    }
+
+    function addProduct() {
+      const cat = document.getElementById('addCategory').value;
+      const name = document.getElementById('addName').value.trim();
+      if (!name) { alert('Name is required'); return; }
+      const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
+      data[cat].push({
+        id,
+        name,
+        meta: document.getElementById('addMeta').value.trim(),
+        description: document.getElementById('addDesc').value.trim(),
+        image: document.getElementById('addImage').value.trim() || 'images/redmi-15c.jpg',
+        url: document.getElementById('addUrl').value.trim() || 'https://www.jumia.co.ke/',
+        badge: document.getElementById('addBadge').value.trim(),
+        featured: document.getElementById('addFeatured').checked
+      });
+      // clear form
+      ['addName','addMeta','addDesc','addUrl','addBadge'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('addFeatured').checked = false;
+      switchTab(cat);
+      renderAll();
+      alert('Product added. Click Download products.json to keep it.');
+    }
+
+    function fillSettings() {
+      document.getElementById('setAffiliate').value = data.settings.affiliateLink || '';
+      document.getElementById('setWhatsapp').value = data.settings.whatsapp || '';
+      document.getElementById('setEmail').value = data.settings.email || '';
+      document.getElementById('setPassword').value = data.settings.adminPassword || '';
+    }
+
+    function saveSettings() {
+      data.settings.affiliateLink = document.getElementById('setAffiliate').value.trim();
+      data.settings.whatsapp = document.getElementById('setWhatsapp').value.trim();
+      data.settings.email = document.getElementById('setEmail').value.trim();
+      data.settings.adminPassword = document.getElementById('setPassword').value.trim() || 'jumia2026';
+      alert('Settings saved in memory. Click Download products.json to keep them.');
+    }
+
+    function downloadJSON() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'products.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Init
+    loadData().then(() => {
+      if (sessionStorage.getItem('adminAuth') === '1') showAdmin();
+    });
+  </script>
+</body>
+</html>
